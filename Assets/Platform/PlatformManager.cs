@@ -16,16 +16,30 @@ public class PlatformManager : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
+        GameEventManager.GameStart += GameStart;
+        GameEventManager.GameOver += GameOver;
         objectQueue = new Queue<Transform>(numberOfObjects);
         for (int i = 0; i < numberOfObjects; ++i)
         {
-            objectQueue.Enqueue((Transform)Instantiate(prefab));
+            objectQueue.Enqueue((Transform)Instantiate(
+                prefab, new Vector3(0f,0f,-100f), Quaternion.identity));
         }
+        enabled = false;
+    }
+
+    private void GameStart()
+    {
         nextPosition = startPosition;
         for (int i = 0; i < numberOfObjects; ++i)
         {
             Recycle();
         }
+        enabled = true;
+    }
+
+    private void GameOver()
+    {
+        enabled = false;
     }
 
     // Update is called once per frame
@@ -36,6 +50,9 @@ public class PlatformManager : MonoBehaviour {
             Recycle();
         }
     }
+
+    public Material[] materials;
+    public PhysicMaterial[] physicsMaterials;
 
     private void Recycle()
     {
@@ -51,6 +68,9 @@ public class PlatformManager : MonoBehaviour {
         Transform o = objectQueue.Dequeue();
         o.localScale = scale;
         o.localPosition = position;
+        int materialIndex = Random.Range(0, materials.Length);
+        o.renderer.material = materials[materialIndex];
+        o.collider.material = physicsMaterials[materialIndex];
         objectQueue.Enqueue(o);
 
         nextPosition += new Vector3(
