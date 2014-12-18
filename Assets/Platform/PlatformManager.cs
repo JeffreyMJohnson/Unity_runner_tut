@@ -54,6 +54,8 @@ public class PlatformManager : MonoBehaviour {
     public Material[] materials;
     public PhysicMaterial[] physicsMaterials;
 
+    public Booster booster;
+
     private void Recycle()
     {
         Vector3 scale = new Vector3(
@@ -64,6 +66,7 @@ public class PlatformManager : MonoBehaviour {
         Vector3 position = nextPosition;
         position.x += scale.x * .5f;
         position.y += scale.y * .5f;
+        booster.SpawnIfAvailable(position);
 
         Transform o = objectQueue.Dequeue();
         o.localScale = scale;

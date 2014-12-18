@@ -1,14 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Runner : MonoBehaviour {
+public class Runner : MonoBehaviour
+{
 
     public static float distanceTraveled;
     public float acceleration;
-    public Vector3 jumpVelocity;
+    public Vector3 jumpVelocity, boostVelocity;
     public float gameOverY;
 
     private bool touchingPlatforms;
+    private static int boosts;
 
     private Vector3 startPosition;
 
@@ -24,7 +26,10 @@ public class Runner : MonoBehaviour {
 
     private void GameStart()
     {
+        boosts = 0;
+        GUIManager.SetBoosts(boosts);
         distanceTraveled = 0f;
+        GUIManager.SetDistance(distanceTraveled);
         transform.localPosition = startPosition;
         renderer.enabled = true;
         rigidbody.isKinematic = false;
@@ -38,20 +43,32 @@ public class Runner : MonoBehaviour {
         enabled = false;
     }
 
-	// Update is called once per frame
-	void Update () {
-        if (touchingPlatforms && Input.GetButtonDown("Jump"))
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetButtonDown("Jump"))
         {
-            rigidbody.AddForce(jumpVelocity, ForceMode.VelocityChange);
-            touchingPlatforms = false;
+            if (touchingPlatforms)
+            {
+                rigidbody.AddForce(jumpVelocity, ForceMode.VelocityChange);
+                touchingPlatforms = false;
+            }
+            else if (boosts > 0)
+            {
+                rigidbody.AddForce(boostVelocity, ForceMode.VelocityChange);
+                boosts -= 1;
+                GUIManager.SetBoosts(boosts);
+            }
+
         }
         distanceTraveled = transform.localPosition.x;
+        GUIManager.SetDistance(distanceTraveled);
 
         if (transform.localPosition.y < gameOverY)
         {
             GameEventManager.TriggerGameOver();
         }
-	}
+    }
 
     void FixedUpdate()
     {
@@ -68,5 +85,11 @@ public class Runner : MonoBehaviour {
     void OnCollisionExit()
     {
         touchingPlatforms = false;
+    }
+
+    internal static void AddBoost()
+    {
+        boosts += 1;
+        GUIManager.SetBoosts(boosts);
     }
 }
